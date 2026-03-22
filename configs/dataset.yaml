@@ -1,0 +1,71 @@
+# Dataset Configuration
+dataset:
+  name: "Forest Inspection Dataset - Sunny"
+  root: "data/forest_sunny"
+  
+  # Zenodo source
+  zenodo_record_id: "15511426"
+  zenodo_base_url: "https://zenodo.org/records/15511426/files"
+
+  # Sequences
+  sequences:
+    seq1: { pitch: 0, altitude: 30, images: 1468 }
+    seq2: { pitch: -60, altitude: 30, images: 1501 }
+    seq3: { pitch: -90, altitude: 30, images: 1469 }
+    seq4: { pitch: 0, altitude: 50, images: 1432 }
+    seq5: { pitch: -60, altitude: 50, images: 1447 }
+    seq6: { pitch: -90, altitude: 50, images: 1437 }
+    seq7: { pitch: 0, altitude: 80, images: 1436 }
+    seq8: { pitch: -60, altitude: 80, images: 1464 }
+    seq9: { pitch: -90, altitude: 80, images: 1474 }
+
+  # Image specifications
+  image:
+    width: 1280
+    height: 768
+    fov: 90
+    format: "png"
+
+  # Semantic classes (11 classes)
+  num_classes: 11
+  classes:
+    - name: "Sky"
+      color: [0, 255, 255]
+      id: 0
+    - name: "Deciduous_trees"
+      color: [0, 127, 0]
+      id: 1
+    - name: "Coniferous_trees"
+      color: [19, 132, 69]
+      id: 2
+    - name: "Fallen_trees"
+      color: [0, 53, 65]
+      id: 3
+    - name: "Dirt_ground"
+      color: [130, 76, 0]
+      id: 4
+    - name: "Ground_vegetation"
+      color: [152, 251, 152]
+      id: 5
+    - name: "Rocks"
+      color: [151, 126, 171]
+      id: 6
+    - name: "Building"
+      color: [250, 150, 0]
+      id: 7
+    - name: "Fence"
+      color: [115, 176, 195]
+      id: 8
+    - name: "Car"
+      color: [123, 123, 123]
+      id: 9
+    - name: "Empty"
+      color: [0, 0, 0]
+      id: 10
+
+  # Default split
+  split:
+    strategy: "cross_sequence"  # cross_sequence | random | cross_altitude
+    train_sequences: ["seq1", "seq2", "seq3", "seq4", "seq5", "seq7", "seq8"]
+    val_sequences: ["seq6"]
+    test_sequences: ["seq9"]
