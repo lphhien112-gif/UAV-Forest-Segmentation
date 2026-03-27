@@ -1,4 +1,4 @@
-# Git Workflow - Forest Inspection Project
+git push origin main# Git Workflow - Forest Inspection Project
 
 Quy trình làm việc nhóm với Git cho dự án semantic segmentation.
 

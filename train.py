@@ -25,7 +25,8 @@ from src.training.trainer import Trainer
 def main():
     parser = argparse.ArgumentParser(description="Train Forest Segmentation Model")
     parser.add_argument("--config", type=str, required=True, help="Config YAML path")
-    parser.add_argument("--data-root", type=str, default=None, help="Override dataset root")
+    parser.add_argument("--data-root", type=str, default=None, help="Override dataset root (single path)")
+    parser.add_argument("--data-roots", type=str, nargs="+", default=None, help="Override dataset roots (multiple paths for Kaggle)")
     parser.add_argument("--epochs", type=int, default=None, help="Override epochs")
     parser.add_argument("--batch-size", type=int, default=None, help="Override batch size")
     parser.add_argument("--lr", type=float, default=None, help="Override learning rate")
@@ -37,8 +38,12 @@ def main():
     cfg = load_config("configs/dataset.yaml", args.config)
 
     # CLI overrides
-    if args.data_root:
-        cfg.dataset.root = args.data_root
+    if args.data_roots:
+        data_roots = args.data_roots
+    elif args.data_root:
+        data_roots = [args.data_root]
+    else:
+        data_roots = list(cfg.dataset.get("data_roots", [cfg.dataset.root]))
     if args.epochs:
         cfg.training.epochs = args.epochs
     if args.batch_size:
@@ -70,12 +75,12 @@ def main():
 
     # Datasets
     train_dataset = ForestDataset(
-        root=cfg.dataset.root,
+        root=data_roots,
         sequences=split["train"],
         transform=train_transforms,
     )
     val_dataset = ForestDataset(
-        root=cfg.dataset.root,
+        root=data_roots,
         sequences=split["val"],
         transform=val_transforms,
     )

@@ -9,7 +9,7 @@ from typing import Optional
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -53,7 +53,7 @@ class Trainer:
 
         # AMP
         self.use_amp = self.config.get("amp", True)
-        self.scaler = GradScaler(enabled=self.use_amp)
+        self.scaler = GradScaler('cuda', enabled=self.use_amp)
         self.accumulation_steps = self.config.get("accumulation_steps", 1)
 
         # Logging

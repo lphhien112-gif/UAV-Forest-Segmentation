@@ -1,5 +1,5 @@
 # Data (too large for git)
-data/
+# data/
 *.zip
 
 # Training outputs
@@ -23,6 +23,8 @@ build/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb_meta
+_kaggle_patches/
+02_train_cells/
 
 # IDE
 .vscode/
@@ -39,3 +41,4 @@ Thumbs.db
 wandb/
 
 implementation_plan.md
+implementation_plan/

@@ -2,7 +2,11 @@
 dataset:
   name: "Forest Inspection Dataset - Sunny"
   root: "data/forest_sunny"
-  
+
+  # Multi-root for Kaggle (multiple dataset mounts)
+  data_roots:
+    - "data/forest_sunny"
+
   # Zenodo source
   zenodo_record_id: "15511426"
   zenodo_base_url: "https://zenodo.org/records/15511426/files"
