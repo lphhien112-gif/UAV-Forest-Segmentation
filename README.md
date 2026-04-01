@@ -28,7 +28,41 @@ python train.py --config configs/train_unet.yaml
 python train.py --config configs/train_unet.yaml --data-root /kaggle/input/forest-sunny
 ```
 
-## 📁 Cấu trúc
+## � Offline Kaggle Training (NEW!)
+
+Để train model **OFFLINE** trên Kaggle với RTX 6900 XT:
+
+### Quick Start:
+```bash
+# 1. Download packages + weights locally (internet required)
+python quick_setup.py --full
+
+# 2. Upload to Kaggle datasets
+kaggle datasets create -p ./offline_setup/wheels --public --dir-mode zip
+kaggle datasets create -p ./offline_setup/weights --public --dir-mode zip
+
+# 3. Copy notebook code + configure
+# Copy: notebooks/02_train_kaggle_offline_v2.py → Kaggle notebook
+# Set: CONFIG['MODEL'] = 'MIT-B5' (or Swin-L, ConvNeXt-L)
+
+# 4. Run all cells (no internet needed!)
+```
+
+### Supported Models:
+- **MIT-B2** - Fast, 65-70% mIoU (~42 hrs) 
+- **MIT-B5** ⭐ - SOTA, 72-75% mIoU (~90 hrs) **RECOMMENDED**
+- **Swin-L** - ViT, 73-76% mIoU (~133 hrs)
+- **ConvNeXt-L** - Modern CNN, 72-75% mIoU (~117 hrs)
+
+### Complete Guide:
+See [OFFLINE_SETUP_GUIDE.md](OFFLINE_SETUP_GUIDE.md) for detailed instructions.
+
+📋 **Quick tools:**
+- `quick_setup.py --status` - Check preparation status
+- `OFFLINE_CHECKLIST.md` - Step-by-step checklist
+- `QUICK_REFERENCE.md` - Common commands
+
+## �📁 Cấu trúc
 
 ```
 configs/          # YAML configs (dataset, training)
