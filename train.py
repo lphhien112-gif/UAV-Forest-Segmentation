@@ -21,7 +21,6 @@ from src.models import build_model
 from src.training.losses import CEDiceLoss
 from src.training.trainer import Trainer
 
-
 def main():
     parser = argparse.ArgumentParser(description="Train Forest Segmentation Model")
     parser.add_argument("--config", type=str, required=True, help="Config YAML path")
