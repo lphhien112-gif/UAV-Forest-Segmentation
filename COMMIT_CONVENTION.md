@@ -188,20 +188,136 @@ chore(release): v1.2.0
 
 ---
 
-## Git Hooks (Khuyến nghị)
+## Thiết lập tự động kiểm tra (Git Hooks)
 
-Cài đặt [commitlint](https://commitlint.js.org/) để tự động kiểm tra format:
+### Cách A: Cài đặt cho từng dự án (Per-Project)
 
 ```bash
-# Cài đặt
-npm install --save-dev @commitlint/{config-conventional,cli}
+# 1. Cài commitlint vào devDependencies
+npm install --save-dev @commitlint/cli @commitlint/config-conventional
 
-# Tạo config
+# 2. Tạo file config tại root dự án
+# File: commitlint.config.js
 echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.js
 
-# Kết hợp với husky
-npx husky add .husky/commit-msg 'npx --no -- commitlint --edit "$1"'
+# 3. Cài husky để quản lý git hooks
+npm install --save-dev husky
+npx husky init
+
+# 4. Tạo hook commit-msg
+echo 'npx --no -- commitlint --edit "$1"' > .husky/commit-msg
 ```
+
+---
+
+### Cách B: Cài đặt GLOBAL cho tất cả dự án
+
+> Áp dụng commit convention cho **mọi repo** trên máy mà không cần cài lại từng project.
+
+#### Bước 1 — Cài commitlint globally
+
+```bash
+npm install -g @commitlint/cli @commitlint/config-conventional
+```
+
+#### Bước 2 — Tạo file config global
+
+Tạo file `~/.commitlintrc.json` (Windows: `C:\Users\<username>\.commitlintrc.json`):
+
+```json
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "type-enum": [
+      2, "always",
+      [
+        "feat", "fix", "docs", "style", "refactor", "perf",
+        "test", "build", "ci", "chore", "revert",
+        "experiment", "data", "model", "config",
+        "notebook", "paper", "viz"
+      ]
+    ],
+    "type-case": [2, "always", "lower-case"],
+    "type-empty": [2, "never"],
+    "subject-empty": [2, "never"],
+    "subject-full-stop": [2, "never", "."],
+    "header-max-length": [2, "always", 72],
+    "body-max-line-length": [1, "always", 100]
+  }
+}
+```
+
+#### Bước 3 — Tạo thư mục global git hooks
+
+```bash
+# Tạo thư mục chứa hooks
+mkdir -p ~/.git-hooks        # Linux/macOS
+mkdir %USERPROFILE%\.git-hooks   # Windows CMD
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.git-hooks"   # PowerShell
+```
+
+#### Bước 4 — Tạo hook script `commit-msg`
+
+Tạo file `~/.git-hooks/commit-msg` (Windows: `C:\Users\<username>\.git-hooks\commit-msg`):
+
+**Linux / macOS / Git Bash:**
+
+```bash
+#!/bin/sh
+# ~/.git-hooks/commit-msg
+npx --no -- commitlint --edit "$1"
+```
+
+Sau đó cấp quyền thực thi:
+
+```bash
+chmod +x ~/.git-hooks/commit-msg
+```
+
+**Windows (PowerShell) — tạo file `.git-hooks/commit-msg`:**
+
+> ⚠️ Git trên Windows (Git Bash) vẫn chạy shell script, nên nội dung file
+> giống Linux. Đảm bảo Git for Windows đã được cài.
+
+```powershell
+@"
+#!/bin/sh
+npx --no -- commitlint --edit `$1
+"@ | Out-File -Encoding utf8 -FilePath "$env:USERPROFILE\.git-hooks\commit-msg"
+```
+
+#### Bước 5 — Đăng ký hooks path vào Git global config
+
+```bash
+git config --global core.hooksPath ~/.git-hooks
+```
+
+Windows CMD/PowerShell:
+
+```bash
+git config --global core.hooksPath "%USERPROFILE%\.git-hooks"
+```
+
+#### Bước 6 — Kiểm tra
+
+```bash
+# Thử commit sai format → bị reject ❌
+git commit --allow-empty -m "wrong format"
+
+# Thử commit đúng format → thành công ✅
+git commit --allow-empty -m "feat: test global commit convention"
+```
+
+---
+
+### Ghi chú quan trọng
+
+| Vấn đề | Giải pháp |
+|---------|-----------|
+| Dự án đã có `.husky` riêng | Hook local sẽ **ghi đè** global. Muốn dùng cả hai thì gọi commitlint trong cả 2 hook |
+| Muốn tắt global cho 1 repo | Chạy `git config core.hooksPath .git/hooks` trong repo đó |
+| `npx` chậm | Dùng đường dẫn tuyệt đối: thay `npx --no -- commitlint` bằng path đến binary, ví dụ trên Windows `C:\Users\<user>\AppData\Roaming\npm\commitlint.cmd --edit $1` |
+| Cập nhật rules | Chỉ cần sửa file `~/.commitlintrc.json`, áp dụng ngay cho tất cả repo |
 
 ---
 

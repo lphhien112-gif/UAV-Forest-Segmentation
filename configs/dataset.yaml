@@ -67,9 +67,9 @@ dataset:
       color: [0, 0, 0]
       id: 10
 
-  # Default split
+  # Paper-based split
   split:
     strategy: "cross_sequence"  # cross_sequence | random | cross_altitude
-    train_sequences: ["seq1", "seq2", "seq3", "seq4", "seq5", "seq7", "seq8"]
-    val_sequences: ["seq6"]
-    test_sequences: ["seq9"]
+    train_sequences: ["seq1", "seq3", "seq4", "seq5", "seq8", "seq9"]  # 8677 images
+    val_sequences: ["seq2"]                                             # 1501 images
+    test_sequences: ["seq6", "seq7"]                                    # 2873 images
