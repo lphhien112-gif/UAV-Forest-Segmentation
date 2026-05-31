@@ -1,0 +1,35 @@
+% ====================== TÓM TẮT ======================
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Phân đoạn ngữ nghĩa (\textit{semantic segmentation}) ảnh chụp từ thiết bị bay
+không người lái (UAV) là bài toán nền tảng cho các ứng dụng giám sát và kiểm kê
+rừng. Tuy nhiên, dữ liệu rừng thu thập từ UAV có đặc trưng \textbf{mất cân bằng
+lớp nghiêm trọng}: trên bộ dữ liệu sử dụng trong báo cáo, tỷ lệ giữa lớp phổ biến
+nhất và lớp hiếm nhất lên tới \textbf{2.761 lần} (Ground\_vegetation $32{,}4\%$ so
+với Fence $0{,}01\%$). Hệ quả là các mô hình huấn luyện bằng hàm mất mát
+Cross-Entropy thuần có xu hướng bỏ qua các lớp hiếm nhưng quan trọng như
+\textit{Fence}, \textit{Car}, \textit{Fallen\_trees}.
+
+Báo cáo này nghiên cứu một cách hệ thống bốn chiến lược xử lý mất cân bằng lớp
+trên kiến trúc \textbf{UNet++ với encoder ResNet50}: (1) Cross-Entropy làm chuẩn
+đối sánh; (2) Cross-Entropy có trọng số lớp; (3) hàm mất mát kết hợp
+Focal\,+\,Dice\,+\,Cross-Entropy với trọng số cố định; và (4) cùng tổ hợp đó nhưng
+trọng số được \textit{học thích nghi} theo cơ chế bất định đa nhiệm (uncertainty
+weighting). Kết quả thực nghiệm cho thấy chiến lược thích nghi đạt
+\textbf{mIoU $= 0{,}8365$}, cao hơn chuẩn Cross-Entropy ($0{,}8187$) $1{,}78$ điểm
+phần trăm, và quan trọng hơn, cải thiện mạnh trên các lớp hiếm
+(Fence: $+10{,}9$ điểm; Car: $+4{,}4$ điểm), trong khi vẫn giữ được hiệu năng trên
+các lớp phổ biến.
+
+Báo cáo cũng trình bày cơ sở lý thuyết của từng hàm mất mát, quy trình thực nghiệm,
+phân tích lỗi theo lớp, và các hướng mở rộng đang được tiến hành (đánh giá trên các
+điều kiện thời tiết \textit{sunny}, \textit{overcast}, \textit{sunny+overcast} và bộ
+dữ liệu \textit{WildUAV}).
+
+\vspace{0.5cm}
+\noindent\textbf{Từ khóa:} phân đoạn ngữ nghĩa, ảnh UAV, giám sát rừng, mất cân bằng
+lớp, Focal Loss, Dice Loss, UNet++, học sâu.
+
+% ----- (Tùy chọn) Abstract tiếng Anh -----
+\TBD{Nếu trường yêu cầu, bổ sung bản Abstract tiếng Anh tại đây.}

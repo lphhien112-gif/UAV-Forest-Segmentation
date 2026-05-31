@@ -1,0 +1,74 @@
+% ====================== PHỤ LỤC ======================
+\chapter{Tái lập thực nghiệm}
+\label{ap:reproduce}
+
+\section*{A.1. Danh sách notebook}
+Các notebook đã chạy (kèm số liệu) đặt trong \texttt{notebooks/executed/}:
+\begin{itemize}[leftmargin=1.4cm]
+  \item \texttt{exp1\_ce\_only.ipynb} --- Exp 1 (CE thuần), test mIoU $= 0{,}8187$.
+  \item \texttt{exp2\_ce\_class\_weights.ipynb} --- Exp 2 (CE + trọng số),
+  test mIoU $= 0{,}8142$.
+  \item \texttt{exp3\_focal\_dice\_ce\_fixed.ipynb} --- Exp 3 (Focal+Dice+CE cố
+  định), test mIoU $= 0{,}8270$.
+  \item \texttt{exp4\_adaptive\_focal\_dice\_seed2025.ipynb} --- Exp 4 (thích nghi,
+  seed 2025), test mIoU $= 0{,}8365$.
+\end{itemize}
+
+\section*{A.2. Bảng màu 11 lớp}
+\begin{center}
+\small
+\begin{tabular}{c l l}
+\toprule
+\textbf{ID} & \textbf{Lớp} & \textbf{Màu (R,G,B)} \\
+\midrule
+0  & Sky               & (0, 255, 255) \\
+1  & Deciduous\_trees  & (0, 127, 0) \\
+2  & Coniferous\_trees & (19, 132, 69) \\
+3  & Fallen\_trees     & (0, 53, 65) \\
+4  & Dirt\_ground      & (130, 76, 0) \\
+5  & Ground\_vegetation& (152, 251, 152) \\
+6  & Rocks             & (151, 126, 171) \\
+7  & Building          & (250, 150, 0) \\
+8  & Fence             & (115, 176, 195) \\
+9  & Car               & (123, 123, 123) \\
+10 & Empty             & (0, 0, 0) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{A.3. Công thức trọng số lớp}
+Trọng số tính theo công thức ENet (PT.~\ref{eq:enet_w}) với $\kappa = 1{,}02$ trên
+tần suất tập huấn luyện.
+
+\section*{A.4. Cấu trúc mã nguồn (\texttt{src/})}
+\begin{center}
+\small
+\begin{tabular}{l l}
+\toprule
+\textbf{Module} & \textbf{Chức năng} \\
+\midrule
+\texttt{src/data/}       & \texttt{dataset.py}, \texttt{splits.py}, \texttt{transforms.py} --- nạp dữ liệu, chia tập, tăng cường \\
+\texttt{src/models/}     & \texttt{unet.py}, \texttt{hrnet.py}, \texttt{pointflow.py} --- định nghĩa mô hình \\
+\texttt{src/training/}   & \texttt{losses.py}, \texttt{metrics.py}, \texttt{trainer.py} --- hàm mất mát, độ đo, vòng huấn luyện \\
+\texttt{src/evaluation/} & \texttt{evaluator.py}, \texttt{visualize.py}, \texttt{deforestation.py} --- đánh giá, trực quan hóa \\
+\texttt{src/utils/}      & \texttt{config.py}, \texttt{logger.py} --- cấu hình, ghi log \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{A.5. Pipeline 4 notebook}
+\begin{center}
+\small
+\begin{tabular}{l c c l}
+\toprule
+\textbf{Notebook} & \textbf{Internet} & \textbf{GPU} & \textbf{Vai trò} \\
+\midrule
+NB01 & ON  & OFF & Chuẩn bị gói + trọng số pretrained (offline assets) \\
+NB02 & OFF & ON  & Huấn luyện, lưu top-$k$ checkpoint \\
+NB03 & ON  & ON  & Đánh giá tập kiểm thử, xuất \texttt{results\_all.csv} \\
+NB04 & OFF & OFF & Tổng hợp bảng + hình cho báo cáo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\TBD{Bổ sung: phiên bản thư viện, lệnh chạy, và liên kết tải checkpoint nếu công bố.}

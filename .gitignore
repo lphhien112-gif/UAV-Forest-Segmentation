@@ -51,3 +51,22 @@ paper/
 docs/
 report/
 UAV-paper/
+
+# Scratch / working files
+scratch/
+
+# LaTeX build artifacts
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.run.xml
+*.bcf
+# Compiled thesis PDF (build lại từ nguồn .tex)
+thesis/main.pdf
