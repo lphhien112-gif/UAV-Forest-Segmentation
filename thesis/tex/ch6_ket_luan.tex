@@ -1,0 +1,41 @@
+% ============================================================
+\chapter{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+\label{ch:ket_luan}
+% ============================================================
+
+\section{Kết luận}
+
+Báo cáo đã nghiên cứu một cách hệ thống bốn chiến lược xử lý mất cân bằng lớp cho bài
+toán phân đoạn ngữ nghĩa ảnh UAV rừng, trên cùng kiến trúc UNet++/ResNet50. Các kết
+luận chính:
+
+\begin{itemize}[leftmargin=1.4cm]
+  \item Bộ dữ liệu rừng UAV có mức \textbf{mất cân bằng lớp rất nghiêm trọng}
+  ($2.761\times$), với hai lớp cực hiếm Fence ($0{,}01\%$) và Car ($0{,}04\%$).
+  \item \textbf{Trọng số lớp đơn thuần không phải giải pháp tốt}: tuy nâng được lớp
+  hiếm nhưng làm giảm hiệu năng lớp phổ biến, dẫn tới mIoU tổng giảm
+  ($0{,}8187 \rightarrow 0{,}8142$).
+  \item \textbf{Tổ hợp Focal+Dice+CE} cải thiện ổn định ($0{,}8270$), và
+  \textbf{phiên bản trọng số thích nghi cho kết quả tốt nhất} ($0{,}8365$,
+  $+1{,}78$ pp so với baseline), đặc biệt trên các lớp hiếm (Fence $+10{,}9$ pp,
+  Car $+4{,}4$ pp).
+  \item Cơ chế \textbf{uncertainty weighting} cân bằng tự động các thành phần loss,
+  vừa nâng lớp hiếm vừa bảo toàn lớp phổ biến --- là lựa chọn được khuyến nghị.
+\end{itemize}
+
+\section{Hướng phát triển}
+\label{sec:huong_morong}
+
+\begin{enumerate}[leftmargin=1.4cm]
+  \item \textbf{Hoàn thiện tính chặt chẽ:} đồng nhất số epoch và giao thức đánh giá;
+  bổ sung đủ 3 seed cho Exp 4 (Mục~\ref{sec:multiseed}).
+  \item \textbf{Độ bền theo điều kiện thời tiết:} hoàn thiện đánh giá trên sunny,
+  overcast và dữ liệu trộn (Mục~\ref{sec:weather}).
+  \item \textbf{Chuyển miền sang ảnh thực:} đánh giá trên WildUAV
+  (Mục~\ref{sec:wilduav}); cân nhắc kỹ thuật thích nghi miền (domain adaptation).
+  \item \textbf{So sánh đa kiến trúc:} mở rộng sang CNN hiện đại (ConvNeXt,
+  EfficientNetV2), Transformer (SegFormer, SwinV2) và mô hình nhẹ cho thiết bị biên
+  (Mục~\ref{sec:multi_arch}).
+  \item \textbf{Tăng cường dữ liệu \& hậu xử lý:} copy-paste cho lớp cực hiếm,
+  Test-Time Augmentation, làm trơn biên (CRF).
+\end{enumerate}

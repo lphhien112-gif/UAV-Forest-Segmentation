@@ -1,0 +1,286 @@
+% ============================================================
+\chapter{DỮ LIỆU VÀ PHƯƠNG PHÁP THỰC NGHIỆM}
+\label{ch:du_lieu}
+% ============================================================
+
+\section{Bộ dữ liệu}
+
+Báo cáo sử dụng bộ dữ liệu \textbf{Forest Inspection} (mô phỏng bằng AirSim), công bố
+trên Zenodo~\cite{forestdataset}. Dữ liệu gồm \textbf{9 chuỗi ảnh} (sequence) thu ở
+các tổ hợp góc chụp (pitch $\in\{0^\circ, -60^\circ, -90^\circ\}$) và độ cao bay
+($\{30, 50, 80\}$ m), tổng cộng hơn $13.000$ cặp ảnh (RGB + nhãn) ở độ phân giải gốc
+$1280\times 768$. Mỗi điểm ảnh được gán một trong \textbf{11 lớp}: Sky,
+Deciduous\_trees, Coniferous\_trees, Fallen\_trees, Dirt\_ground, Ground\_vegetation,
+Rocks, Building, Fence, Car và Empty (nền/không xác định).
+
+\begin{table}[H]
+\centering
+\caption{Đặc tả 9 chuỗi ảnh theo góc chụp và độ cao.}
+\label{tab:sequences}
+\small
+\begin{tabular}{c c c c c l}
+\toprule
+\textbf{Seq} & \textbf{Pitch} & \textbf{Độ cao (m)} & \textbf{Số ảnh} & \textbf{Đặc điểm} \\
+\midrule
+seq1 & $0^\circ$   & 30 & 1.468 & Ngang, thấp \\
+seq2 & $-60^\circ$ & 30 & 1.501 & Chéo, thấp \\
+seq3 & $-90^\circ$ & 30 & 1.469 & Thẳng xuống, thấp \\
+seq4 & $0^\circ$   & 50 & 1.432 & Ngang, trung bình \\
+seq5 & $-60^\circ$ & 50 & 1.447 & Chéo, trung bình \\
+seq6 & $-90^\circ$ & 50 & 1.437 & Thẳng xuống, trung bình \\
+seq7 & $0^\circ$   & 80 & 1.436 & Ngang, cao \\
+seq8 & $-60^\circ$ & 80 & 1.464 & Chéo, cao \\
+seq9 & $-90^\circ$ & 80 & 1.397 & Thẳng xuống, cao \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Quá trình kiểm định bảng màu (\textit{palette}) cho thấy $100\%$ điểm ảnh ánh xạ
+chính xác về 11 lớp trên cả 9 chuỗi --- không có điểm ảnh ngoài bảng màu, khẳng định
+chất lượng nhãn.
+
+\section{Phân tích mất cân bằng lớp}
+\label{sec:imbalance_data}
+
+Bảng~\ref{tab:imbalance} thống kê tần suất điểm ảnh theo lớp (trên tập huấn luyện) và
+trọng số nghịch tần suất tương ứng. Chênh lệch giữa lớp lớn nhất
+(Ground\_vegetation) và lớp nhỏ nhất (Fence) lên tới \textbf{2.761 lần} --- mức mất
+cân bằng rất nghiêm trọng.
+
+\begin{table}[H]
+\centering
+\caption{Phân bố tần suất lớp và mức mất cân bằng (tập huấn luyện).}
+\label{tab:imbalance}
+\small
+\begin{tabular}{c l r r r}
+\toprule
+\textbf{Hạng} & \textbf{Lớp} & \textbf{Tần suất (\%)} & \textbf{Tỷ lệ so lớp min} & \textbf{Trọng số (nghịch tần suất)} \\
+\midrule
+1  & Ground\_vegetation & 32{,}40 & 2.761$\times$ & 0{,}003 \\
+2  & Coniferous\_trees  & 27{,}85 & 2.373$\times$ & 0{,}003 \\
+3  & Sky                & 20{,}33 & 1.733$\times$ & 0{,}004 \\
+4  & Deciduous\_trees   & 15{,}11 & 1.288$\times$ & 0{,}006 \\
+5  & Dirt\_ground       & 1{,}83  & 156$\times$   & 0{,}046 \\
+6  & Rocks              & 1{,}74  & 148$\times$   & 0{,}049 \\
+7  & Fallen\_trees      & 0{,}52  & 44$\times$    & 0{,}164 \\
+8  & Building           & 0{,}18  & 15$\times$    & 0{,}478 \\
+9  & Car                & 0{,}04  & 3{,}6$\times$ & 2{,}026 \\
+10 & \textbf{Fence}     & \textbf{0{,}01} & \textbf{1$\times$} & \textbf{7{,}221} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Nhận định:} bốn lớp \textit{Fallen\_trees, Building, Car, Fence}
+đều dưới $1\%$; riêng Fence ($0{,}01\%$) và Car ($0{,}04\%$) là \textit{cực hiếm}.
+Đây chính là các lớp được kỳ vọng hưởng lợi nhiều nhất từ chiến lược xử lý mất cân
+bằng.
+
+\section{Sự thay đổi miền (domain gap)}
+
+Phân bố lớp biến đổi mạnh theo góc chụp. Đáng chú ý, lớp \textbf{Sky chỉ xuất hiện ở
+các chuỗi $pitch = 0^\circ$} (chiếm $36$--$58\%$) và \textbf{biến mất hoàn toàn}
+($0\%$) ở các chuỗi $-60^\circ$ và $-90^\circ$. Vì vậy, IoU của Sky phụ thuộc hoàn
+toàn vào việc tập kiểm thử có chứa chuỗi chụp ngang hay không --- một yếu tố cần lưu
+ý khi diễn giải kết quả (Chương~\ref{ch:thao_luan}).
+
+\HINH{Biểu đồ phân bố lớp theo chuỗi/nhóm góc chụp — xuất từ notebook khảo sát dữ liệu.}
+
+\section{Chia tập dữ liệu}
+\label{sec:split}
+
+Toàn bộ các thí nghiệm trong báo cáo dùng cách chia theo chuỗi như sau:
+
+\begin{table}[H]
+\centering
+\caption{Cách chia tập dữ liệu dùng trong các thí nghiệm của báo cáo.}
+\label{tab:split}
+\begin{tabular}{l l r}
+\toprule
+\textbf{Tập} & \textbf{Chuỗi} & \textbf{Số ảnh} \\
+\midrule
+Huấn luyện (Train) & seq1, seq3, seq4, seq5, seq8, seq9 & 8.677 \\
+Kiểm định (Val)    & seq2                              & 1.501 \\
+Kiểm thử (Test)    & seq6, seq7                        & 2.873 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Tổng}} & \textbf{13.051} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Đây là cách chia \textbf{theo chuỗi} (cross-sequence) chính thức của dự án: chia theo
+chuỗi thay vì xáo trộn ngẫu nhiên nhằm \textbf{tránh rò rỉ dữ liệu} giữa các khung
+hình liên tiếp của cùng một lần bay, đồng thời buộc tập kiểm thử rơi vào các tổ hợp
+góc--độ cao chưa xuất hiện y hệt trong huấn luyện (đánh giá khả năng tổng quát hóa).
+Tập kiểm thử \{seq6, seq7\} gồm seq6 ($-90^\circ$, 50 m) và seq7 ($0^\circ$, 80 m).
+
+\noindent\textbf{Lưu ý khi diễn giải.} Vì seq7 chụp ngang ($pitch = 0^\circ$) nên
+tập kiểm thử \emph{có} lớp Sky --- đó là lý do IoU của Sky rất cao ($\approx 0{,}99$)
+ở mọi thí nghiệm. Điều quan trọng nhất là cả bốn thí nghiệm dùng \textbf{cùng một
+cách chia và cùng tập kiểm thử}, nên các con số \textbf{so sánh trực tiếp được với
+nhau}. (Một số tài liệu khảo sát ban đầu của dự án từng dùng tập kiểm thử seq9 ---
+thẳng xuống, không có Sky; do đó không nên đối chiếu trực tiếp các con số giữa hai
+cách chia.)
+
+\section{Kiến trúc và cấu hình huấn luyện}
+
+Để cô lập ảnh hưởng của hàm mất mát, mọi thí nghiệm cố định kiến trúc và siêu tham
+số huấn luyện như Bảng~\ref{tab:config}.
+
+\begin{table}[H]
+\centering
+\caption{Cấu hình huấn luyện dùng chung.}
+\label{tab:config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Thành phần} & \textbf{Giá trị} \\
+\midrule
+Kiến trúc            & UNet++ (\texttt{UnetPlusPlus}) \\
+Encoder              & ResNet50, khởi tạo ImageNet \\
+Kích thước ảnh       & $1024 \times 1024$ \\
+Batch size           & 4 \\
+Optimizer            & AdamW (weight decay $10^{-4}$) \\
+Learning rate        & $10^{-4}$ \\
+Scheduler            & CosineAnnealingLR ($\eta_{min}=10^{-6}$) \\
+Mixed precision      & Có (AMP) \\
+Số lớp               & 11 (mIoU tính trên 10 lớp, bỏ \textit{Empty}) \\
+Tiêu chí chọn mô hình& mIoU cao nhất trên tập kiểm định \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tăng cường dữ liệu}
+Trên tập huấn luyện áp dụng các phép tăng cường (thư viện \texttt{albumentations}):
+lật ngang/dọc, xoay $\pm30^\circ$, thay đổi độ sáng--tương phản, biến đổi màu
+(hue/saturation), thêm nhiễu Gauss, và chuẩn hóa theo thống kê ImageNet. Tập kiểm
+định và kiểm thử \textbf{chỉ} resize và chuẩn hóa (không tăng cường) để đánh giá khách
+quan. Tăng cường giúp mô hình bền hơn với biến thiên góc chụp/ánh sáng và giảm
+quá khớp --- đặc biệt hữu ích cho các lớp hiếm.
+
+\subsection{Quy trình và mã nguồn}
+Toàn bộ quy trình được tổ chức theo bốn notebook: \textbf{NB01} chuẩn bị gói thư viện
+và trọng số pretrained offline; \textbf{NB02} huấn luyện và lưu top-$k$ checkpoint
+theo mIoU kiểm định; \textbf{NB03} đánh giá trên tập kiểm thử (mIoU, PA, mF1,
+per-class IoU, ma trận nhầm lẫn); \textbf{NB04} tổng hợp bảng và hình cho báo cáo. Mã
+nguồn dùng chung được module hóa trong thư mục \texttt{src/} (xem
+Phụ lục~\ref{ap:reproduce}). Bốn thí nghiệm của báo cáo nằm trong
+\texttt{notebooks/executed/}. Luồng dữ liệu giữa bốn notebook minh họa ở
+Hình~\ref{fig:pipeline}.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  >=stealth, font=\footnotesize, node distance=0.5cm,
+  nb/.style={draw, rounded corners=3pt, minimum width=2.9cm, minimum height=1.7cm,
+             align=center, fill=blue!10},
+  art/.style={draw, dashed, rounded corners=2pt, align=center, fill=gray!8,
+              font=\scriptsize, minimum height=0.8cm},
+  data/.style={draw, cylinder, shape aspect=0.3, aspect=0.3, rotate=90,
+               minimum height=2.2cm, minimum width=1.3cm, fill=green!12, align=center,
+               font=\scriptsize}]
+  % 4 notebook
+  \node[nb] (n1) at (0,0)   {\textbf{NB01}\\Chuẩn bị\\assets offline\\{\scriptsize(Net ON, GPU OFF)}};
+  \node[nb] (n2) at (4,0)   {\textbf{NB02}\\Huấn luyện\\{\scriptsize(Net OFF, GPU ON)}};
+  \node[nb] (n3) at (8,0)   {\textbf{NB03}\\Đánh giá\\{\scriptsize(Net ON, GPU ON)}};
+  \node[nb] (n4) at (12,0)  {\textbf{NB04}\\Báo cáo\\{\scriptsize(CPU)}};
+  % artefacts giữa các bước
+  \node[art, below=0.7cm of n1] (a1) {offline\_assets/\\(gói + weights)};
+  \node[art, below=0.7cm of n2] (a2) {checkpoints/\\*.pth};
+  \node[art, below=0.7cm of n3] (a3) {results\_all.csv};
+  \node[art, below=0.7cm of n4] (a4) {bảng + hình};
+  % dataset
+  \node[data] (ds) at (6,2.4) {Dataset rừng\\seq1--9};
+  % luồng chính
+  \draw[->, thick] (n1)--(n2); \draw[->, thick] (n2)--(n3); \draw[->, thick] (n3)--(n4);
+  % artefact xuống/lên
+  \draw[->] (n1)--(a1); \draw[->] (n2)--(a2); \draw[->] (n3)--(a3); \draw[->] (n4)--(a4);
+  \draw[->, gray] (a1) -| (n2); \draw[->, gray] (a2) -| (n3); \draw[->, gray] (a3) -| (n4);
+  % dataset -> NB02, NB03
+  \draw[->, green!45!black] (ds) -| (n2);
+  \draw[->, green!45!black] (ds) -| (n3);
+\end{tikzpicture}}
+\caption{Pipeline bốn notebook: NB01 chuẩn bị gói và trọng số pretrained offline; NB02
+huấn luyện (lưu checkpoint); NB03 đánh giá trên tập kiểm thử (xuất CSV); NB04 tổng hợp
+bảng và hình. Dataset rừng cấp dữ liệu cho NB02 và NB03.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Thiết kế thí nghiệm}
+\label{sec:experiment_design}
+
+Đề tài thực hiện một nghiên cứu \textit{ablation} bốn mức, tăng dần độ phức tạp của
+chiến lược xử lý mất cân bằng (Bảng~\ref{tab:experiments}). Cơ sở lý thuyết của từng
+hàm mất mát đã trình bày ở Mục~\ref{sec:loss}.
+
+\begin{table}[H]
+\centering
+\caption{Bốn thí nghiệm so sánh chiến lược xử lý mất cân bằng lớp.}
+\label{tab:experiments}
+\small
+\begin{tabular}{c l l c c}
+\toprule
+\textbf{TN} & \textbf{Chiến lược} & \textbf{Hàm mất mát} & \textbf{Epochs} & \textbf{Seed} \\
+\midrule
+Exp 1 & CE thuần (chuẩn đối sánh) & PT.~\eqref{eq:ce} & 50 & 42 \\
+Exp 2 & CE + trọng số lớp & PT.~\eqref{eq:ce}--\eqref{eq:enet_w} & 50 & 42 \\
+Exp 3 & Focal+Dice+CE (trọng số cố định) & PT.~\eqref{eq:combo} & 50 & 42 \\
+Exp 4 & Focal+Dice+CE (trọng số thích nghi) & PT.~\eqref{eq:adaptive} & 100 & 2025 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Các notebook tương ứng đặt trong thư mục \texttt{notebooks/executed/}:
+\texttt{exp1\_ce\_only}, \texttt{exp2\_ce\_class\_weights},
+\texttt{exp3\_focal\_dice\_ce\_fixed}, \texttt{exp4\_adaptive\_focal\_dice\_seed2025}.
+
+\subsection{Chi tiết cấu hình hàm mất mát}
+Để bảo đảm tái lập, cấu hình cụ thể của bốn hàm mất mát (cơ sở lý thuyết ở
+Mục~\ref{sec:loss}) như sau:
+\begin{itemize}[leftmargin=1.4cm]
+  \item \textbf{Exp 1 --- CE thuần:} Cross-Entropy không trọng số, bỏ qua lớp
+  \textit{Empty} (\texttt{ignore\_index}).
+  \item \textbf{Exp 2 --- CE + trọng số lớp:} dùng PT.~\eqref{eq:enet_w}; trọng số thực
+  tế tính trên tập huấn luyện cho ở Bảng~\ref{tab:weights}.
+  \item \textbf{Exp 3 --- Focal+Dice+CE (cố định):} Focal ($\gamma=2{,}0$) + Dice (bỏ
+  lớp \textit{Empty}) + CE, trọng số cố định $(\lambda_F,\lambda_D,\lambda_{CE})=
+  (1{,}0;\,1{,}0;\,0{,}5)$.
+  \item \textbf{Exp 4 --- Focal+Dice+CE (thích nghi):} cùng ba thành phần như Exp 3
+  nhưng tỷ trọng học được theo PT.~\eqref{eq:adaptive}; khởi tạo $\log\sigma_k=0$
+  (tương ứng trọng số ban đầu bằng 1).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Trọng số lớp (ENet, $\kappa=1{,}02$) tính trên tập huấn luyện, dùng cho
+Exp~2--4.}
+\label{tab:weights}
+\small
+\begin{tabular}{l r r}
+\toprule
+\textbf{Lớp} & \textbf{Tần suất (\%)} & \textbf{Trọng số $w_c$} \\
+\midrule
+Sky                & 14{,}33 & 0{,}2375 \\
+Deciduous\_trees   & 16{,}44 & 0{,}2123 \\
+Coniferous\_trees  & 29{,}04 & 0{,}1329 \\
+Fallen\_trees      & 0{,}58  & 1{,}4115 \\
+Dirt\_ground       & 2{,}00  & 0{,}9150 \\
+Ground\_vegetation & 35{,}46 & 0{,}1129 \\
+Rocks              & 1{,}91  & 0{,}9353 \\
+Building           & 0{,}19  & 1{,}6549 \\
+Fence              & 0{,}013 & 1{,}8018 \\
+Car                & 0{,}047 & 1{,}7724 \\
+\bottomrule
+\end{tabular}
+\end{table}
+{\footnotesize Trọng số được chuẩn hóa để tổng bằng số lớp; lớp càng hiếm trọng số
+càng cao (Fence, Car, Building lớn nhất).}
+
+\section{Môi trường và quy trình}
+
+Huấn luyện thực hiện trên GPU NVIDIA (Kaggle / RTX 6000 PRO). Mỗi lần chạy gồm: thu
+thập \& ghép cặp ảnh--nhãn theo chuỗi, tính trọng số lớp (nếu dùng), huấn luyện với
+lưu \textit{top-k} checkpoint theo mIoU kiểm định, và đánh giá trên tập kiểm thử bằng
+checkpoint tốt nhất.
+
+\TBD{Bổ sung phiên bản thư viện (PyTorch, segmentation-models-pytorch,
+albumentations\dots) và thông số phần cứng chính xác nếu trường yêu cầu.}
